@@ -3,7 +3,6 @@ import pyautogui
 import numpy as np
 from PIL import ImageGrab
 from pyscreeze import center
-from time import sleep
 
 
 X_OFFSET = 1920
@@ -17,29 +16,11 @@ SAMPLES = {
     "6": "msx-6.png",
     "7": "msx-7.png",
     "8": "msx-8.png",
-    "covered": "msx-covered.png",
-    "flag": "msx-flag.png",
-    "mine": "msx-mine.png",
-    "explosion": "msx-explosion.png",
+    "C": "msx-covered.png",
+    "F": "msx-flag.png",
+    "M": "msx-mine.png",
+    "E": "msx-explosion.png",
 }
-
-
-class MinesweeperPoint:
-    def __init__(self, x, y, value):
-        self.x = x // 16
-        self.y = y // 16
-        self.value = value
-
-    @staticmethod
-    def create(box, value):
-        point = center(box)
-        x = point.x
-        y = point.y
-        return MinesweeperPoint(x, y, value)
-
-    @staticmethod
-    def sort_index(point):
-        return point.x + (point.y * 500)
 
 
 class MinesweeperBoard:
@@ -59,52 +40,20 @@ class MinesweeperBoard:
         self.top = top_left.top + top_left.height
         self.bottom = bottom_right.top
 
-    def get_points(self) -> list[MinesweeperPoint]:
+    def get_grid(self):
         screen = ImageGrab.grab(
             bbox=(self.left, self.top, self.right, self.bottom),
             all_screens=True,
         )
-        points = []
-        for key, sample in SAMPLES.items():
+        grid = np.empty(self.size, dtype=str)
+        for value, sample in SAMPLES.items():
             boxes = pyautogui.locateAll(f"samples/{sample}", screen)
             for box in boxes:
-                points.append(MinesweeperPoint.create(box, key))
-        return points
-
-    def get_grid(self):
-        points = self.get_points()
-        points = sorted(points, key=MinesweeperPoint.sort_index)
-
-        grid = []
-        row = []
-        y = 0
-        for point in points:
-            if point.y != y:
-                grid.append(row)
-                row = []
-                y = point.y
-            row.append(point.value)
-        grid.append(row)
-        self.grid = grid
+                point = center(box)
+                x = point.x // 16
+                y = point.y // 16
+                grid[y, x] = value
         return grid
-
-    def print_grid(self):
-        for row in self.grid:
-            print(f"| ", end="")
-            for item in row:
-                if item == "covered":
-                    item = " "
-                elif item == "flag":
-                    item = "F"
-                elif item == "mine":
-                    item = "M"
-                elif item == "explosion":
-                    item = "E"
-                print(f"{item} | ", end="")
-            print()
-
-    def print_header(self):
-        print("+---" * game.width + "+")
 
     @property
     def width(self):
@@ -116,16 +65,15 @@ class MinesweeperBoard:
 
     @property
     def size(self):
-        return f"{self.width} x {self.height}"
+        return (self.width, self.height)
+
+
+def print_grid(grid):
+    print("-" * (grid.shape[0] * 2 + 3))
+    print(str(grid).replace("C", " ").replace("'", ""))
 
 
 if __name__ == "__main__":
     game = MinesweeperBoard()
     print(game.size)
-
-    game.print_header()
-    while True:
-        game.get_grid()
-        game.print_grid()
-        game.print_header()
-        sleep(1)
+    print_grid(game.get_grid())

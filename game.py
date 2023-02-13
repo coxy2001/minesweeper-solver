@@ -7,15 +7,15 @@ from pyscreeze import center
 
 X_OFFSET = 1920
 SAMPLES = {
-    "0": "msx-0.png",
-    "1": "msx-1.png",
-    "2": "msx-2.png",
-    "3": "msx-3.png",
-    "4": "msx-4.png",
-    "5": "msx-5.png",
-    "6": "msx-6.png",
-    "7": "msx-7.png",
-    "8": "msx-8.png",
+    0: "msx-0.png",
+    1: "msx-1.png",
+    2: "msx-2.png",
+    3: "msx-3.png",
+    4: "msx-4.png",
+    5: "msx-5.png",
+    6: "msx-6.png",
+    7: "msx-7.png",
+    8: "msx-8.png",
     "C": "msx-covered.png",
     "F": "msx-flag.png",
     "M": "msx-mine.png",
@@ -30,7 +30,7 @@ class MinesweeperCell:
         self.value = value
 
     def __str__(self) -> str:
-        return self.value
+        return f"({self.x}, {self.y}) {self.value}"
 
 
 class MinesweeperBoard:
@@ -62,7 +62,7 @@ class MinesweeperBoard:
                 point = center(box)
                 x = point.x // 16
                 y = point.y // 16
-                grid[y, x] = MinesweeperCell(x, y, value)
+                grid[x, y] = MinesweeperCell(x, y, value)
         return grid
 
     @property
@@ -80,9 +80,12 @@ class MinesweeperBoard:
 
 def print_grid(grid: np.ndarray):
     print("-" * (grid.shape[0] * 2))
-    for x in range(grid.shape[0]):
-        for y in range(grid.shape[1]):
-            print(grid[x, y].value.replace("C", " "), end=" ")
+    for y in range(grid.shape[1]):
+        for x in range(grid.shape[0]):
+            if grid[x, y].value == "C":
+                print(" ", end=" ")
+            else:
+                print(grid[x, y].value, end=" ")
         print()
 
 

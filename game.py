@@ -1,6 +1,6 @@
+import numpy as np
 import pyautogui
 
-import numpy as np
 from PIL import ImageGrab
 from pyscreeze import center
 
@@ -21,6 +21,16 @@ SAMPLES = {
     "M": "msx-mine.png",
     "E": "msx-explosion.png",
 }
+
+
+class MinesweeperCell:
+    def __init__(self, x, y, value):
+        self.x = x
+        self.y = y
+        self.value = value
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class MinesweeperBoard:
@@ -45,14 +55,14 @@ class MinesweeperBoard:
             bbox=(self.left, self.top, self.right, self.bottom),
             all_screens=True,
         )
-        grid = np.empty(self.size, dtype=str)
+        grid = np.empty(self.size, dtype=MinesweeperCell)
         for value, sample in SAMPLES.items():
             boxes = pyautogui.locateAll(f"samples/{sample}", screen)
             for box in boxes:
                 point = center(box)
                 x = point.x // 16
                 y = point.y // 16
-                grid[y, x] = value
+                grid[y, x] = MinesweeperCell(x, y, value)
         return grid
 
     @property
@@ -68,9 +78,12 @@ class MinesweeperBoard:
         return (self.width, self.height)
 
 
-def print_grid(grid):
-    print("-" * (grid.shape[0] * 2 + 3))
-    print(str(grid).replace("C", " ").replace("'", ""))
+def print_grid(grid: np.ndarray):
+    print("-" * (grid.shape[0] * 2))
+    for x in range(grid.shape[0]):
+        for y in range(grid.shape[1]):
+            print(grid[x, y].value.replace("C", " "), end=" ")
+        print()
 
 
 if __name__ == "__main__":

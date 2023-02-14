@@ -7,7 +7,7 @@ from pyscreeze import center
 
 X_OFFSET = 1920
 SAMPLES = {
-    0: "msx-0.png",
+    "-": "msx-0.png",
     1: "msx-1.png",
     2: "msx-2.png",
     3: "msx-3.png",
@@ -24,10 +24,12 @@ SAMPLES = {
 
 
 class MinesweeperCell:
-    def __init__(self, x, y, value):
+    def __init__(self, x, y, value, screen_x, screen_y):
         self.x = x
         self.y = y
         self.value = value
+        self.screen_x = screen_x
+        self.screen_y = screen_y
 
     def __str__(self) -> str:
         return f"({self.x}, {self.y}) {self.value}"
@@ -62,7 +64,9 @@ class MinesweeperBoard:
                 point = center(box)
                 x = point.x // 16
                 y = point.y // 16
-                grid[x, y] = MinesweeperCell(x, y, value)
+                grid[x, y] = MinesweeperCell(
+                    x, y, value, point.x + self.left, point.y + self.top
+                )
         return grid
 
     @property
